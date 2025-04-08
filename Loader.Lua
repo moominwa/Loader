@@ -105,63 +105,51 @@ MainTab:CreateButton({
    end
 })
 
--- 🗡️ Kill Aura Toggle + วาร์ป Golyne
-local killAuraEnabled = false
-local killAuraConnection
-
+-- 🧭 วาร์ปไปตีมอนใกล้สุด
 MainTab:CreateButton({
-   Name = "🗡️ Toggle Kill Aura (Golyne)",
+   Name = "🗡️ วาร์ปไปตีมอนใกล้สุด",
    Callback = function()
-      local Players = game:GetService("Players")
-      local LocalPlayer = Players.LocalPlayer
-      local RunService = game:GetService("RunService")
-      local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+      local plr = game.Players.LocalPlayer
+      local char = plr.Character or plr.CharacterAdded:Wait()
 
-      killAuraEnabled = not killAuraEnabled
+      local closestEnemy
+      local shortestDistance = math.huge
 
-      if killAuraEnabled then
-         -- 🔁 วาร์ปไป Golyne
-         local golyne = workspace:FindFirstChild("Golyne") or workspace:FindFirstChild("GOLYNE")
-         if golyne and golyne:FindFirstChild("HumanoidRootPart") then
-            character:WaitForChild("HumanoidRootPart").CFrame = golyne.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-         else
-            Rayfield:Notify({
-               Title = "Golyne ไม่พบ",
-               Content = "หา NPC Golyne ไม่เจอใน workspace",
-               Duration = 5
-            })
-            return
-         end
-
-         -- ⚔️ เริ่ม Kill Aura
-         killAuraConnection = RunService.RenderStepped:Connect(function()
-            local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool then
-               tool:Activate()
+      for _, mob in pairs(workspace:GetDescendants()) do
+         if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob ~= char then
+            local root = mob:FindFirstChild("HumanoidRootPart")
+            if root then
+               local dist = (char:WaitForChild("HumanoidRootPart").Position - root.Position).Magnitude
+               if dist < shortestDistance then
+                  shortestDistance = dist
+                  closestEnemy = root
+               end
             end
-         end)
-
-         Rayfield:Notify({
-            Title = "Kill Aura",
-            Content = "🗡️ ON: ตีกับ Golyne อยู่",
-            Duration = 4
-         })
-      else
-         if killAuraConnection then
-            killAuraConnection:Disconnect()
-            killAuraConnection = nil
-
-            Rayfield:Notify({
-               Title = "Kill Aura",
-               Content = "❌ OFF: หยุดตีแล้ว",
-               Duration = 4
-            })
          end
+      end
+
+      if closestEnemy then
+         char:MoveTo(closestEnemy.Position + Vector3.new(0, 0, 2)) -- วาร์ปไปด้านหน้าศัตรูเล็กน้อย
+
+         -- ตี
+         local tool = char:FindFirstChildOfClass("Tool")
+         if tool and tool:FindFirstChild("Handle") then
+            for i = 1, 3 do
+               tool:Activate()
+               task.wait(0.2)
+            end
+         end
+      else
+         Rayfield:Notify({
+            Title = "ไม่พบมอน",
+            Content = "ไม่เจอมอนใกล้ๆ",
+            Duration = 3
+         })
       end
    end
 })
 
--- 🧩 UI Toggle (กดปุ่มขวา Shift เพื่อเปิด/ปิด)
+-- 🧩 UI Toggle (RightShift)
 local uis = game:GetService("UserInputService")
 uis.InputBegan:Connect(function(input, gameProcessed)
    if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
