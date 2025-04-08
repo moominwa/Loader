@@ -147,4 +147,48 @@ MainTab:CreateButton({
       end
    end
 })
-
+local Tab = Window:NewTab("Misc")
+local Section = Tab:NewSection("Teleport")
+players = {}
+ 
+for i,v in pairs(game:GetService("Players"):GetChildren()) do
+   table.insert(players,v.Name)
+end
+ 
+Section:NewDropdown("Select Player", " ", players, function(abc)
+    Select = abc
+end)
+ 
+local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+ 
+ 
+Section:NewButton("Refresh", " ", function()
+    table.clear(players)
+    for i, v in ipairs(game.Players:GetChildren()) do
+        table.insert(players, v.Name)
+    end
+end)
+ 
+Section:NewButton("Teleport", " ", function()
+   if Select then
+       rootpart.CFrame = game:GetService("Players"):FindFirstChild(Select).Character.HumanoidRootPart.CFrame
+   end
+end)
+ 
+Section:NewTextBox("TP to Player", "Tp to player", function(name)
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if string.sub(player.DisplayName:lower(), 1, #name) == name:lower() or
+           string.sub(player.Name:lower(), 1, #name) == name:lower() then
+            plr = player
+            break 
+        end
+    end
+ 
+    if plr then
+        local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local plrootpart = plr.Character:FindFirstChild("HumanoidRootPart")
+        if rootpart then
+            rootpart.CFrame = plrootpart.CFrame * CFrame.new(0, 0, -5)
+        end
+    end
+end)
