@@ -38,8 +38,8 @@ Rayfield:Notify({
 })
 
 -- ✅ Tabs
-local MainTab = Window:CreateTab("⚙️ HOEM", 4483362458)
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
+
 -- 🔁 กลับหน้า Home
 MainTab:CreateButton({
    Name = "🔙 กลับไปหน้า Home",
@@ -148,12 +148,29 @@ MainTab:CreateButton({
    end
 })
 
--- ปุ่ม Teleport ไปยังผู้เล่นที่เลือก
+-- เพิ่ม Dropdown เพื่อเลือกผู้เล่น
+local players = {}
+for i, v in pairs(game:GetService("Players"):GetChildren()) do
+    table.insert(players, v.Name)
+end
+
+local selectedPlayer
+
+-- เพิ่ม Dropdown ให้เลือกผู้เล่น
+MainTab:CreateDropdown({
+    Name = "Select Player",
+    Options = players,
+    Callback = function(selected)
+        selectedPlayer = selected
+    end
+})
+
+-- เพิ่มปุ่ม Teleport ไปยังผู้เล่นที่เลือก
 MainTab:CreateButton({
    Name = "🔮 Teleport to Selected Player",
    Callback = function()
-      if Select then
-          local targetPlayer = game:GetService("Players"):FindFirstChild(Select)
+      if selectedPlayer then
+          local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
           if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
               local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
               rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
@@ -173,4 +190,3 @@ MainTab:CreateButton({
       end
    end
 })
-
