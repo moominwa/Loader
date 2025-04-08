@@ -105,6 +105,62 @@ MainTab:CreateButton({
    end
 })
 
+-- 🗡️ Kill Aura Toggle + วาร์ป Golyne
+local killAuraEnabled = false
+local killAuraConnection
+
+MainTab:CreateButton({
+   Name = "🗡️ Toggle Kill Aura (Golyne)",
+   Callback = function()
+      local Players = game:GetService("Players")
+      local LocalPlayer = Players.LocalPlayer
+      local RunService = game:GetService("RunService")
+      local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+      killAuraEnabled = not killAuraEnabled
+
+      if killAuraEnabled then
+         -- 🔁 วาร์ปไป Golyne
+         local golyne = workspace:FindFirstChild("Golyne") or workspace:FindFirstChild("GOLYNE")
+         if golyne and golyne:FindFirstChild("HumanoidRootPart") then
+            character:WaitForChild("HumanoidRootPart").CFrame = golyne.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
+         else
+            Rayfield:Notify({
+               Title = "Golyne ไม่พบ",
+               Content = "หา NPC Golyne ไม่เจอใน workspace",
+               Duration = 5
+            })
+            return
+         end
+
+         -- ⚔️ เริ่ม Kill Aura
+         killAuraConnection = RunService.RenderStepped:Connect(function()
+            local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+            if tool then
+               tool:Activate()
+            end
+         end)
+
+         Rayfield:Notify({
+            Title = "Kill Aura",
+            Content = "🗡️ ON: ตีกับ Golyne อยู่",
+            Duration = 4
+         })
+      else
+         if killAuraConnection then
+            killAuraConnection:Disconnect()
+            killAuraConnection = nil
+
+            Rayfield:Notify({
+               Title = "Kill Aura",
+               Content = "❌ OFF: หยุดตีแล้ว",
+               Duration = 4
+            })
+         end
+      end
+   end
+})
+
 -- 🧩 UI Toggle (กดปุ่มขวา Shift เพื่อเปิด/ปิด)
 local uis = game:GetService("UserInputService")
 uis.InputBegan:Connect(function(input, gameProcessed)
