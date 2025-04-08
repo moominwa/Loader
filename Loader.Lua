@@ -148,31 +148,6 @@ MainTab:CreateButton({
    end
 })
 
--- เพิ่ม Tab ใหม่สำหรับการวาร์ปไปยังผู้เล่น
-local Tab = Window:NewTab("Misc")
-local Section = Tab:NewSection("Teleport")
-local players = {}
-
--- เพิ่มผู้เล่นทั้งหมดลงในรายการ
-for i, v in pairs(game:GetService("Players"):GetChildren()) do
-   table.insert(players, v.Name)
-end
-
--- Dropdown สำหรับเลือกผู้เล่น
-Section:NewDropdown("Select Player", " ", players, function(abc)
-    Select = abc
-end)
-
-local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
--- ปุ่ม Refresh
-Section:NewButton("Refresh", " ", function()
-    table.clear(players)
-    for i, v in ipairs(game.Players:GetChildren()) do
-        table.insert(players, v.Name)
-    end
-end)
-
 -- ปุ่ม Teleport ไปยังผู้เล่นที่เลือก
 MainTab:CreateButton({
    Name = "🔮 Teleport to Selected Player",
@@ -199,59 +174,3 @@ MainTab:CreateButton({
    end
 })
 
--- ปุ่ม Teleport ไปยังผู้เล่นที่พิมพ์ใน TextBox
-MainTab:CreateButton({
-   Name = "🔮 Teleport to Player by Name",
-   Callback = function()
-      if Select then
-          local targetPlayer = game:GetService("Players"):FindFirstChild(Select)
-          if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-              local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-              rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-          else
-              Rayfield:Notify({
-                  Title = "Error",
-                  Content = "Player or HumanoidRootPart not found.",
-                  Duration = 3
-              })
-          end
-      else
-          Rayfield:Notify({
-              Title = "Error",
-              Content = "Player with the given name not found.",
-              Duration = 3
-          })
-      end
-   end
-})
-
--- TextBox สำหรับพิมพ์ชื่อผู้เล่น
-Section:NewTextBox("TP to Player", "Tp to player", function(name)
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if string.sub(player.DisplayName:lower(), 1, #name) == name:lower() or
-           string.sub(player.Name:lower(), 1, #name) == name:lower() then
-            plr = player
-            break 
-        end
-    end
-
-    if plr then
-        local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local plrootpart = plr.Character:FindFirstChild("HumanoidRootPart")
-        if rootpart and plrootpart then
-            rootpart.CFrame = plrootpart.CFrame * CFrame.new(0, 0, -5)
-        else
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Target player or their HumanoidRootPart is missing.",
-                Duration = 3
-            })
-        end
-    else
-        Rayfield:Notify({
-            Title = "Player Not Found",
-            Content = "Player with the given name not found.",
-            Duration = 3
-        })
-    end
-end)
