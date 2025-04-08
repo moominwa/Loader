@@ -38,7 +38,6 @@ Rayfield:Notify({
 })
 
 -- ✅ Tabs
-local HomeTab = Window:CreateTab("🏠 Home", 4483362458)
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
 
 -- 🔁 กลับหน้า Home
@@ -149,10 +148,3 @@ MainTab:CreateButton({
    end
 })
 
--- 🧩 UI Toggle (RightShift)
-local uis = game:GetService("UserInputService")
-uis.InputBegan:Connect(function(input, gameProcessed)
-   if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
-      Rayfield:Toggle()
-   end
-end)
