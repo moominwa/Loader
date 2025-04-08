@@ -174,20 +174,56 @@ Section:NewButton("Refresh", " ", function()
 end)
 
 -- ปุ่ม Teleport ไปยังผู้เล่นที่เลือก
-Section:NewButton("Teleport", " ", function()
-   if Select then
-       local targetPlayer = game:GetService("Players"):FindFirstChild(Select)
-       if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-           rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-       else
-           Rayfield:Notify({
-               Title = "Error",
-               Content = "Player or HumanoidRootPart not found.",
-               Duration = 3
-           })
-       end
+MainTab:CreateButton({
+   Name = "🔮 Teleport to Selected Player",
+   Callback = function()
+      if Select then
+          local targetPlayer = game:GetService("Players"):FindFirstChild(Select)
+          if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+              local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+              rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+          else
+              Rayfield:Notify({
+                  Title = "Error",
+                  Content = "Player or HumanoidRootPart not found.",
+                  Duration = 3
+              })
+          end
+      else
+          Rayfield:Notify({
+              Title = "Error",
+              Content = "No player selected.",
+              Duration = 3
+          })
+      end
    end
-end)
+})
+
+-- ปุ่ม Teleport ไปยังผู้เล่นที่พิมพ์ใน TextBox
+MainTab:CreateButton({
+   Name = "🔮 Teleport to Player by Name",
+   Callback = function()
+      if Select then
+          local targetPlayer = game:GetService("Players"):FindFirstChild(Select)
+          if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+              local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+              rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+          else
+              Rayfield:Notify({
+                  Title = "Error",
+                  Content = "Player or HumanoidRootPart not found.",
+                  Duration = 3
+              })
+          end
+      else
+          Rayfield:Notify({
+              Title = "Error",
+              Content = "Player with the given name not found.",
+              Duration = 3
+          })
+      end
+   end
+})
 
 -- TextBox สำหรับพิมพ์ชื่อผู้เล่น
 Section:NewTextBox("TP to Player", "Tp to player", function(name)
