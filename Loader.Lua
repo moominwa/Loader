@@ -38,7 +38,7 @@ Rayfield:Notify({
 })
 
 -- ✅ Tabs
-local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
+local MainTab = Window:CreateTab("⚙️ HOEM", 4483362458)
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
 -- 🔁 กลับหน้า Home
 MainTab:CreateButton({
