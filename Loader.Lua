@@ -37,11 +37,11 @@ Rayfield:Notify({
     }
 })
 
--- สร้างแท็บ
+-- ✅ Tabs
 local HomeTab = Window:CreateTab("🏠 Home", 4483362458)
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
 
--- ปุ่มกลับหน้า Home
+-- 🔁 กลับหน้า Home
 MainTab:CreateButton({
    Name = "🔙 กลับไปหน้า Home",
    Callback = function()
@@ -53,7 +53,7 @@ MainTab:CreateButton({
    end
 })
 
--- ปุ่ม NoClip
+-- 🚪 NoClip
 MainTab:CreateButton({
    Name = "🚪 NoClip",
    Callback = function()
@@ -83,19 +83,32 @@ MainTab:CreateButton({
    end
 })
 
--- ปุ่ม Speed Hack
+-- 💨 Toggle Speed
+local speedEnabled = false
 MainTab:CreateButton({
-   Name = "💨 up speed",
+   Name = "💨 สลับ Speed (On/Off)",
    Callback = function()
       local player = game.Players.LocalPlayer
       local char = player.Character or player.CharacterAdded:Wait()
-      local humanoid = char:WaitForChild("Humanoid")
+      local humanoid = char:FindFirstChildOfClass("Humanoid")
 
-      humanoid.WalkSpeed = 200
-      Rayfield:Notify({
-         Title = "Speed Hack",
-         Content = "So fast",
-         Duration = 4
-      })
+      if humanoid then
+         speedEnabled = not speedEnabled
+         humanoid.WalkSpeed = speedEnabled and 100 or 16
+
+         Rayfield:Notify({
+            Title = "Speed",
+            Content = speedEnabled and "Speed ON (x6+)" or "Speed OFF (ปกติ)",
+            Duration = 4
+         })
+      end
    end
 })
+
+-- 🧩 UI Toggle (กดปุ่มขวา Shift เพื่อเปิด/ปิด)
+local uis = game:GetService("UserInputService")
+uis.InputBegan:Connect(function(input, gameProcessed)
+   if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
+      Rayfield:Toggle()
+   end
+end)
