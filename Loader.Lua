@@ -25,14 +25,44 @@ local Window = Rayfield:CreateWindow({
 
 Rayfield:Notify({
     Title = "BALLXZ HUB Loaded",
-    Content = "ยินดีต้อนรับ!",
+    Content = "Hello",
     Duration = 6,
     Actions = {
         Dismiss = {
-            Name = "ตกลง",
+            Name = "yes",
             Callback = function()
                 print("Hub started.")
             end
         }
     }
 })
+local Button = MainTab:CreateButton({
+   Name = "NoClip",
+   Callback = function()
+      -- Toggle state
+      _G.noclip = not _G.noclip
+
+      if _G.noclipStarted == nil then
+         _G.noclipStarted = true
+         game.StarterGui:SetCore("SendNotification", {
+            Title = "BALLXZ Hub",
+            Text = "NoClip Activated!",
+            Duration = 5
+         })
+
+         local plr = game:GetService("Players").LocalPlayer
+         local char = plr.Character or plr.CharacterAdded:Wait()
+
+         game:GetService("RunService").Stepped:Connect(function()
+            if _G.noclip then
+               for _, part in pairs(char:GetDescendants()) do
+                  if part:IsA("BasePart") and part.CanCollide == true then
+                     part.CanCollide = false
+                  end
+               end
+            end
+         end)
+      end
+   end
+})
+
