@@ -40,48 +40,6 @@ Rayfield:Notify({
 -- ✅ Tabs
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
 
--- 🔁 กลับหน้า Home
-MainTab:CreateButton({
-   Name = "🔙 กลับไปหน้า Home",
-   Callback = function()
-      Rayfield:Notify({
-         Title = "กลับหน้า Home",
-         Content = "คลิกที่ Tab '🏠 Home' ด้านบนเพื่อกลับหน้าแรก",
-         Duration = 5
-      })
-   end
-})
-
--- 🚪 NoClip
-MainTab:CreateButton({
-   Name = "🚪 NoClip",
-   Callback = function()
-      _G.noclip = not _G.noclip
-
-      if _G.noclipStarted == nil then
-         _G.noclipStarted = true
-         game.StarterGui:SetCore("SendNotification", {
-            Title = "BALLXZ Hub",
-            Text = "NoClip Activated!",
-            Duration = 5
-         })
-
-         local plr = game:GetService("Players").LocalPlayer
-         local char = plr.Character or plr.CharacterAdded:Wait()
-
-         game:GetService("RunService").Stepped:Connect(function()
-            if _G.noclip then
-               for _, part in pairs(char:GetDescendants()) do
-                  if part:IsA("BasePart") and part.CanCollide then
-                     part.CanCollide = false
-                  end
-               end
-            end
-         end)
-      end
-   end
-})
-
 -- 💨 Toggle Speed
 local speedEnabled = false
 MainTab:CreateButton({
@@ -104,7 +62,15 @@ MainTab:CreateButton({
    end
 })
 
--- 🧭 วาร์ปไปตีมอนใกล้สุด
+-- 🧩 UI Toggle (กดปุ่มขวา Shift เพื่อเปิด/ปิด)
+local uis = game:GetService("UserInputService")
+uis.InputBegan:Connect(function(input, gameProcessed)
+   if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
+      Rayfield:Toggle()
+   end
+end)
+
+-- 🗡️ วาร์ปไปตีมอนใกล้สุด
 MainTab:CreateButton({
    Name = "🗡️ วาร์ปไปตีมอนใกล้สุด",
    Callback = function()
@@ -190,3 +156,25 @@ MainTab:CreateButton({
       end
    end
 })
+
+-- 🎲 สุ่ม Summon ใน Anime Rangers X
+MainTab:CreateButton({
+   Name = "🎲 Summon (Anime Rangers X)",
+   Callback = function()
+      local player = game.Players.LocalPlayer
+      local char = player.Character or player.CharacterAdded:Wait()
+      local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("Summon")
+
+      if remote then
+         remote:InvokeServer()
+         Rayfield:Notify({
+            Title = "Summon",
+            Content = "เรียกใช้ Summon สำเร็จ",
+            Duration = 3
+         })
+      else
+         Rayfield:Notify({
+            Title = "Summon",
+
+::contentReference[oaicite:13]{index=13}
+ 
