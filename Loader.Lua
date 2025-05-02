@@ -1,180 +1,97 @@
--- BALLXZ HUB Loader
+-- BALLXZ HUB Advanced Macro (2025-05-02 08:21)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
-local Window = Rayfield:CreateWindow({
-   Name = "BALLXZ HUB",
-   LoadingTitle = "BALLXZ",
-   LoadingSubtitle = "by BALLXZ",
-   Theme = "Default",
-   ConfigurationSaving = {
-      Enabled = false,
-      FolderName = nil,
-      FileName = "BALLXZ Hub"
-   },
-   KeySystem = false,
-   KeySettings = {
-      Title = "BALLXZ GET KEY",
-      Subtitle = "Key System",
-      Note = "No method of obtaining the key is provided",
-      FileName = "Key",
-      SaveKey = true,
-      GrabKeyFromSite = false,
-      Key = {"Hello"}
-   }
-})
-
-Rayfield:Notify({
-    Title = "BALLXZ HUB Loaded",
-    Content = "Hello",
-    Duration = 6,
-    Actions = {
-        Dismiss = {
-            Name = "yes",
-            Callback = function()
-                print("Hub started.")
-            end
-        }
-    }
-})
-
--- ✅ Tabs
+local Players, RunService, VIM = game:GetService("Players"), game:GetService("RunService"), game:GetService("VirtualInputManager")
+local LP = Players.LocalPlayer
+local Window = Rayfield:CreateWindow({ Name = "BALLXZ HUB", Theme = "Default" })
 local MainTab = Window:CreateTab("⚙️ Main", 4483362458)
 
--- 💨 Toggle Speed
-local speedEnabled = false
+-- ☑️ Global Vars
+local MacroRecording, MacroPlaying, MacroData, AutoMacro = false, false, {}, true
+
+-- 🔴 Start / Stop Macro Recording
 MainTab:CreateButton({
-   Name = "💨 สลับ Speed (On/Off)",
+   Name = "🔴 เริ่ม/หยุด อัด Macro",
    Callback = function()
-      local player = game.Players.LocalPlayer
-      local char = player.Character or player.CharacterAdded:Wait()
-      local humanoid = char:FindFirstChildOfClass("Humanoid")
+      MacroRecording = not MacroRecording
+      Rayfield:Notify({
+         Title = "Macro",
+         Content = MacroRecording and "เริ่มอัด" or "หยุดอัด",
+         Duration = 3
+      })
 
-      if humanoid then
-         speedEnabled = not speedEnabled
-         humanoid.WalkSpeed = speedEnabled and 100 or 16
+      if MacroRecording then
+         MacroData = {}
+         local startTime = tick()
 
-         Rayfield:Notify({
-            Title = "Speed",
-            Content = speedEnabled and "Speed ON (x6+)" or "Speed OFF (ปกติ)",
-            Duration = 4
-         })
+         RunService.Heartbeat:Connect(function()
+            if not MacroRecording then return end
+            local char = LP.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+            table.insert(MacroData, {
+               Time = tick() - startTime,
+               Position = char.HumanoidRootPart.CFrame,
+               ToolUsed = (char:FindFirstChildOfClass("Tool") and char:FindFirstChildOfClass("Tool").Name) or nil
+            })
+         end)
       end
    end
 })
 
--- 🧩 UI Toggle (กดปุ่มขวา Shift เพื่อเปิด/ปิด)
-local uis = game:GetService("UserInputService")
-uis.InputBegan:Connect(function(input, gameProcessed)
-   if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
-      Rayfield:Toggle()
-   end
-end)
-
--- 🗡️ วาร์ปไปตีมอนใกล้สุด
+-- ▶️ เล่น Macro
 MainTab:CreateButton({
-   Name = "🗡️ วาร์ปไปตีมอนใกล้สุด",
+   Name = "▶️ เล่น Macro",
    Callback = function()
-      local plr = game.Players.LocalPlayer
-      local char = plr.Character or plr.CharacterAdded:Wait()
+      if #MacroData == 0 then
+         Rayfield:Notify({ Title = "Macro", Content = "ยังไม่มีการอัด", Duration = 2 })
+         return
+      end
 
-      local closestEnemy
-      local shortestDistance = math.huge
+      MacroPlaying = true
+      local char = LP.Character or LP.CharacterAdded:Wait()
+      local root = char:WaitForChild("HumanoidRootPart")
 
-      for _, mob in pairs(workspace:GetDescendants()) do
-         if mob:IsA("Model") and mob:FindFirstChild("Humanoid") and mob ~= char then
-            local root = mob:FindFirstChild("HumanoidRootPart")
-            if root then
-               local dist = (char:WaitForChild("HumanoidRootPart").Position - root.Position).Magnitude
-               if dist < shortestDistance then
-                  shortestDistance = dist
-                  closestEnemy = root
-               end
-            end
+      Rayfield:Notify({ Title = "Macro", Content = "กำลังเล่น...", Duration = 3 })
+
+      for i, step in ipairs(MacroData) do
+         if not MacroPlaying then break end
+         task.wait(step.Time - (MacroData[i-1] and MacroData[i-1].Time or 0))
+
+         root.CFrame = step.Position
+
+         -- ใช้ Tool หากมีชื่อที่ตรง
+         if step.ToolUsed and char:FindFirstChild(step.ToolUsed) then
+            local tool = char:FindFirstChild(step.ToolUsed)
+            tool:Activate()
          end
       end
 
-      if closestEnemy then
-         char:MoveTo(closestEnemy.Position + Vector3.new(0, 0, 2)) -- วาร์ปไปด้านหน้าศัตรูเล็กน้อย
-
-         -- ตี
-         local tool = char:FindFirstChildOfClass("Tool")
-         if tool and tool:FindFirstChild("Handle") then
-            for i = 1, 3 do
-               tool:Activate()
-               task.wait(0.2)
-            end
-         end
-      else
-         Rayfield:Notify({
-            Title = "ไม่พบมอน",
-            Content = "ไม่เจอมอนใกล้ๆ",
-            Duration = 3
-         })
-      end
+      MacroPlaying = false
+      Rayfield:Notify({ Title = "Macro", Content = "เล่นจบแล้ว", Duration = 3 })
    end
 })
 
--- เพิ่ม Dropdown เพื่อเลือกผู้เล่น
-local players = {}
-for i, v in pairs(game:GetService("Players"):GetChildren()) do
-    table.insert(players, v.Name)
+-- 🔁 เปิด/ปิด Auto Macro
+MainTab:CreateToggle({
+   Name = "🟢 เปิด Auto Macro เมื่อเข้าเกม",
+   CurrentValue = true,
+   Callback = function(state)
+      AutoMacro = state
+   end
+})
+
+-- 🧠 Auto start เมื่อเข้าเกมใหม่
+if AutoMacro then
+   task.wait(5) -- รอโหลด map
+   if #MacroData > 0 then
+      local root = LP.Character:WaitForChild("HumanoidRootPart")
+      for i, step in ipairs(MacroData) do
+         task.wait(step.Time - (MacroData[i-1] and MacroData[i-1].Time or 0))
+         root.CFrame = step.Position
+         if step.ToolUsed then
+            local tool = LP.Character:FindFirstChild(step.ToolUsed)
+            if tool then tool:Activate() end
+         end
+      end
+   end
 end
-
-local selectedPlayer
-
--- เพิ่ม Dropdown ให้เลือกผู้เล่น
-MainTab:CreateDropdown({
-    Name = "Select Player",
-    Options = players,
-    Callback = function(selected)
-        selectedPlayer = selected
-    end
-})
-
--- เพิ่มปุ่ม Teleport ไปยังผู้เล่นที่เลือก
-MainTab:CreateButton({
-   Name = "🔮 Teleport to Selected Player",
-   Callback = function()
-      if selectedPlayer then
-          local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
-          if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-              local rootpart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-              rootpart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
-          else
-              Rayfield:Notify({
-                  Title = "Error",
-                  Content = "Player or HumanoidRootPart not found.",
-                  Duration = 3
-              })
-          end
-      else
-          Rayfield:Notify({
-              Title = "Error",
-              Content = "No player selected.",
-              Duration = 3
-          })
-      end
-   end
-})
-
--- 🎲 สุ่ม Summon ใน Anime Rangers X
-MainTab:CreateButton({
-   Name = "🎲 Summon (Anime Rangers X)",
-   Callback = function()
-      local player = game.Players.LocalPlayer
-      local char = player.Character or player.CharacterAdded:Wait()
-      local remote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes"):FindFirstChild("Summon")
-
-      if remote then
-         remote:InvokeServer()
-         Rayfield:Notify({
-            Title = "Summon",
-            Content = "เรียกใช้ Summon สำเร็จ",
-            Duration = 3
-         })
-      else
-         Rayfield:Notify({
-            Title = "Summon",
-
-::contentReference[oaicite:13]{index=13}
- 
